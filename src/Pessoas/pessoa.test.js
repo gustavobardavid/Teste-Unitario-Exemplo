@@ -1,6 +1,17 @@
 import GerenciadorPessoas from "./gerenciador.pessoas";
 
-describe('Inserção de Pessoas', () => {
+jest.mock("./repositorio.pessoas");
+
+describe(' Validação de Pessoas', () => {
+    
+    beforeAll(() => {});
+
+    let gerenciadorPessoas;
+
+    beforeEach(()=>{
+        gerenciadorPessoas = new GerenciadorPessoas()
+        gerenciadorPessoas.repositorioPessoas.getAll.mockReturnValue([])
+    })
 
     test('Nao aceitar Cliente com nome null', () => {
         const PessoaTeste = {
@@ -9,9 +20,8 @@ describe('Inserção de Pessoas', () => {
             cpf: "12345678900",
             dtNasc: "2001-08-23"
         }
-        const gerenciadorPessoas = new GerenciadorPessoas()
         expect(() => {
-            gerenciadorPessoas.inserirCliente(PessoaTeste)
+            gerenciadorPessoas.validaCliente(PessoaTeste)
         }).toThrow(Error)
     })
 
@@ -22,9 +32,8 @@ describe('Inserção de Pessoas', () => {
             cpf: "12345678900",
             dtNasc: "2001-08-23"
         }
-        const gerenciadorPessoas = new GerenciadorPessoas()
         expect (() => {
-            gerenciadorPessoas.inserirCliente(PessoaTeste)
+            gerenciadorPessoas.validaCliente(PessoaTeste)
         }).toThrow(Error)
     })
 
@@ -35,9 +44,8 @@ describe('Inserção de Pessoas', () => {
             cpf: "1",
             dtNasc: "2001-08-23"
         }
-        const gerenciadorPessoas = new GerenciadorPessoas()
         expect (() => {
-            gerenciadorPessoas.inserirCliente(PessoaTeste)
+            gerenciadorPessoas.validaCliente(PessoaTeste)
         }).toThrow(Error)
     })
     test('Não aceitar menores de idade', () => {
@@ -47,10 +55,38 @@ describe('Inserção de Pessoas', () => {
             cpf: "12345678900",
             dtNasc: "2008-08-23"
         }
-        const gerenciadorPessoas = new GerenciadorPessoas()
         expect (() => {
-            gerenciadorPessoas.inserirCliente(PessoaTeste)
+            gerenciadorPessoas.validaCliente(PessoaTeste)
         }).toThrow(Error)
     })
+
+    test('Deve permitir inserção de pessoas', () => {
+        const PessoaTeste = {
+            nome:"Nycole",
+            sobrenome: "Sofia",
+            cpf: "12345678900",
+            dtNasc: "2002-08-23"
+        }
+        gerenciadorPessoas.repositorioPessoas.getTotal.mockReturnValue(1)
+        gerenciadorPessoas.validaCliente(PessoaTeste)
+        expect(gerenciadorPessoas.getTotal()).toBe(1);
+    })
+
+    test('Não permitir cliente com mesmo cpf', () =>{
+        const PessoaTeste = {
+            nome:"Nycole",
+            sobrenome: "Sofia",
+            cpf: "12345678900",
+            dtNasc: "2002-08-23"
+        }
+        gerenciadorPessoas.repositorioPessoas.getAll.mockReturnValue([PessoaTeste])
+        expect(gerenciadorPessoas.validaCliente(PessoaTeste)).toThrow(Error)
+    })
+    
+    afterEach (()=> {
+        jest.clearAllMocks();
+    })
+
+    afterAll(() => {});
 
 })
